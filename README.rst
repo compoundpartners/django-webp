@@ -7,7 +7,7 @@ support.
 |Build Status| |Coverage Status|
 
 
-Usage
+Usage for static files
 -----
 
 Load the ``webp`` module in your template and use the ``webp``
@@ -21,11 +21,39 @@ templatetag to point to the image you want to convert.
     <img src="{% webp 'path/to/your/image.png' %}" alt="image" />
     <!--
     If the browser has support, generates:
-    <img src="/static/WEBP_CACHE/path/to/your/image.webp" alt="image" />
+    <img src="/static/path/to/your/image.webp" alt="image" />
 
     else, generates:
     <img src="/static/path/to/your/image.png" alt="image" />
     -->
+
+Usage for filer images
+-----
+
+Load the ``webp`` module in your template and use the ``webp``
+templatetag to point to the image you want to convert.
+
+.. code:: html
+
+    {% load webp %}
+
+    <img src="{% webp person.visual %}" alt="person" />
+
+    {# or #}
+
+    <img src="{% webp person.visual.file %}" alt="person" />
+
+Usage for thumnails
+-----
+
+.. code:: html
+
+    {% thumbnail person.visual "200x200" as im %}
+    <img src="{{ im.url }}{% if supports_webp %}.webp{% endif %}" alt="{{ person.name }}">
+
+    {# or #}
+
+    <img src="{% thumbnail person.visual "200x200" %}{% if supports_webp %}.webp{% endif %}" alt="{{ person.name }}">
 
 Installation
 ------------
@@ -79,18 +107,3 @@ installed the ``libwebp-dev`` after already installed ``Pillow``, it’s
 necessary to uninstall and install it back because it needs to be
 compiled with it.
 
-Cleaning the cache
-------------------
-
-You can clean the cache running:
-
-.. code:: sh
-
-    python manage.py clean_webp_images
-
-.. _the official guide: https://developers.google.com/speed/webp/docs/precompiled
-
-.. |Build Status| image:: https://travis-ci.org/andrefarzat/django-webp.png?branch=master
-   :target: https://travis-ci.org/andrefarzat/django-webp
-.. |Coverage Status| image:: https://coveralls.io/repos/github/andrefarzat/django-webp/badge.svg?branch=master
-   :target: https://coveralls.io/github/andrefarzat/django-webp?branch=master

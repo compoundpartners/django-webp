@@ -1,0 +1,6 @@
+{
+    "package-name": "js-webp",
+    "installed-apps": [
+        "django_webp"
+    ]
+}

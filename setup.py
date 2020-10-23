@@ -1,5 +1,5 @@
 import setuptools
-
+from django_webp import __version__
 
 with open('README.rst') as file:
     long_description = file.read()
@@ -7,7 +7,7 @@ with open('README.rst') as file:
 
 setuptools.setup(
     name='django-webp',
-    version='2.0.0',
+    version=__version__,
     author=u'Andre Farzat',
     author_email='andrefarzat@gmail.com',
     packages=setuptools.find_packages(),
