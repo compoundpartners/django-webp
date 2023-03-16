@@ -6,7 +6,7 @@ with open('README.rst') as file:
 
 
 setuptools.setup(
-    name='django-webp',
+    name='js-webp',
     version=__version__,
     author=u'Andre Farzat',
     author_email='andrefarzat@gmail.com',
