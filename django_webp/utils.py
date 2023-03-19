@@ -69,7 +69,7 @@ class WEBPImageConverter:
 
 def store_as_webp(sender, **kwargs):
     converter = WEBPImageConverter()
-    converter.init(sender.name, sender.storage, new_name=sender.name + '.webp', image=sender.image)
+    converter.init(sender.name, sender.storage, image=sender.image)
     converter.get_webp_url()
     #webp_path = sender.storage.path('.'.join([sender.name, 'webp']))
     #sender.image.save(webp_path, 'webp')

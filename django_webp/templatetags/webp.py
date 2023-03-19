@@ -15,10 +15,13 @@ register = template.Library()
 def webp(context, value):
     if value:
         converter = WEBPImageConverter()
+        class_name = value.__class__.__name__
 
-        if value.__class__.__name__ == 'Image' and hasattr(value, 'file'):
+        if class_name == 'Image' and hasattr(value, 'file'):
             converter.init(value.file.name, value.file.storage, file_obj=value.file)
-        elif value.__class__.__name__ == 'MultiStorageFieldFile':
+        elif class_name == 'MultiStorageFieldFile':
+            converter.init(value.name, value.storage, file_obj=value.file)
+        elif class_name == 'ThumbnailFile':
             converter.init(value.name, value.storage, file_obj=value.file)
         else:
             converter.init(value, staticfiles_storage)
