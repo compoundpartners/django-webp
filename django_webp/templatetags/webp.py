@@ -17,12 +17,17 @@ def webp(context, value):
         converter = WEBPImageConverter()
         class_name = value.__class__.__name__
 
+        try:
+            file_obj = value.file
+        except:
+            file_obj = None
+
         if class_name == 'Image' and hasattr(value, 'file'):
-            converter.init(value.file.name, value.file.storage, file_obj=value.file)
+            converter.init(value.file.name, value.file.storage, file_obj=file_obj)
         elif class_name == 'MultiStorageFieldFile':
-            converter.init(value.name, value.storage, file_obj=value.file)
+            converter.init(value.name, value.storage, file_obj=file_obj)
         elif class_name == 'ThumbnailFile':
-            converter.init(value.name, value.storage, file_obj=value.file)
+            converter.init(value.name, value.storage, file_obj=file_obj)
         else:
             converter.init(value, staticfiles_storage)
 

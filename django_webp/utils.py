@@ -11,18 +11,14 @@ WEBP_DEBUG = getattr(settings, 'WEBP_DEBUG', settings.DEBUG)
 class WEBPImageConverter:
 
     def init(self, name, storage, file_obj=None, image=None, new_name=None):
-        try:
-            self.name = name
-            self.storage = storage
-            self.file_obj = file_obj
-            self.image = image
-            self.new_name = new_name
-            self.path = self.storage_path(self.name)
-            if not self.new_name:
-                self.new_name = '.'.join([*self.name.split('.')[:-1], 'webp'])
-        except:
-            logger = logging.getLogger(__name__)
-            logger.warn('WEBP image init error, source name is %s' % name)
+        self.name = name
+        self.storage = storage
+        self.file_obj = file_obj
+        self.image = image
+        self.new_name = new_name
+        self.path = self.storage_path(self.name)
+        if not self.new_name:
+            self.new_name = '.'.join([*self.name.split('.')[:-1], 'webp'])
 
     def storage_path(self, name):
         if 'S3' in self.storage.__class__.__name__:
@@ -30,15 +26,18 @@ class WEBPImageConverter:
         return  self.storage.path(name)
 
     def get_url(self):
-        if not self.storage.exists(self.path):
+        # if not self.storage.exists(self.path):
+        #     return ''
+        try:
+            return self.storage.url(self.name)
+        except:
             return ''
-        return self.storage.url(self.name)
 
     def get_webp_url(self):
         new_path = self.storage_path(self.new_name)
 
         if not self.storage.exists(self.path):
-            return ''
+            return self.get_url()
 
         if not self.generate_webp_image(new_path):
             return self.get_url()
