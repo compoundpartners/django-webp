@@ -7,6 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.templatetags.static import static
 
 WEBP_DEBUG = getattr(settings, 'WEBP_DEBUG', settings.DEBUG)
+WEBP_CONVERT_GIF = getattr(settings, 'WEBP_CONVERT_GIF', True)
 
 class WEBPImageConverter:
 
@@ -40,6 +41,9 @@ class WEBPImageConverter:
             return self.get_url()
 
         if not self.generate_webp_image(new_path):
+            return self.get_url()
+
+        if not WEBP_CONVERT_GIF and self.name.endswith('.gif'):
             return self.get_url()
 
         return self.storage.url(self.new_name)
