@@ -65,6 +65,6 @@ def webp_picture(value, **kwargs):
         webp_value = converter.get_webp_url()
 
     if webp_value:
-        return mark_safe(f'<picture><source srcset="{webp_value}" type="image/webp"/><img src="{value}{kwargs_text}"/></picture>')
+        return mark_safe(f'<picture><source srcset="{webp_value}" type="image/webp"/><img src="{value}"{kwargs_text}/></picture>')
     else:
         return mark_safe(f'<img src="{value}"{kwargs_text}/>')
