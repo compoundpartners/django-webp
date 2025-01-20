@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import mimetypes
 import os
 import logging
 
@@ -11,6 +12,7 @@ from django_webp.utils import WEBPImageConverter, WEBP_DEBUG
 
 
 register = template.Library()
+
 
 @register.simple_tag(takes_context=True)
 def webp(context, value):
@@ -39,9 +41,8 @@ def webp(context, value):
 
     return ''
 
-@register.simple_tag
-def webp_picture(value, **kwargs):
-    kwargs_text = ' '.join([''] + [f'{key}="{value}"' for key, value in kwargs.items()])
+
+def convert(value):
     webp_value = None
     if value:
         converter = WEBPImageConverter()
@@ -61,10 +62,29 @@ def webp_picture(value, **kwargs):
         else:
             converter.init(value, staticfiles_storage)
 
-        value = converter.get_url() or value
+        value = converter.get_url() or value.url
         webp_value = converter.get_webp_url()
+    return value, webp_value
+
+
+@register.simple_tag
+def webp_picture(value, **kwargs):
+    kwargs_text = ' '.join([''] + [f'{key}="{value}"' for key, value in kwargs.items()])
+
+    value, webp_value = convert(value)
 
     if webp_value:
         return mark_safe(f'<picture><source srcset="{webp_value}" type="image/webp"/><img src="{value}"{kwargs_text}/></picture>')
     else:
         return mark_safe(f'<img src="{value}"{kwargs_text}/>')
+
+
+@register.simple_tag
+def webp_imageset(value):
+    value, webp_value = convert(value)
+    mimetype = mimetypes.guess_type(value)[0]
+
+    if webp_value:
+        return f'image-set(url({webp_value}) type(image/webp), url({value}) type({mimetype})'
+    else:
+        return f'url({value})'
