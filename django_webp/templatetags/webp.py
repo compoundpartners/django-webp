@@ -85,6 +85,6 @@ def webp_imageset(value):
     mimetype = mimetypes.guess_type(value)[0]
 
     if webp_value:
-        return f'image-set(url({webp_value}) type(image/webp), url({value}) type({mimetype})'
+        return mark_safe(f'image-set(url({webp_value}) type(image/webp), url({value}) type({mimetype})')
     else:
-        return f'url({value})'
+        return mark_safe(f'url({value})')
