@@ -15,24 +15,24 @@ register = template.Library()
 
 
 @register.simple_tag(takes_context=True)
-def webp(context, value):
-    if value:
+def webp(context, source):
+    if source:
         converter = WEBPImageConverter()
-        class_name = value.__class__.__name__
+        class_name = source.__class__.__name__
 
         try:
-            file_obj = value.file
+            file_obj = source.file
         except:
             file_obj = None
 
-        if class_name == 'Image' and hasattr(value, 'file'):
-            converter.init(value.file.name, value.file.storage, file_obj=file_obj)
+        if class_name == 'Image' and hasattr(source, 'file'):
+            converter.init(source.file.name, source.file.storage, file_obj=file_obj)
         elif class_name == 'MultiStorageFieldFile':
-            converter.init(value.name, value.storage, file_obj=file_obj)
+            converter.init(source.name, source.storage, file_obj=file_obj)
         elif class_name == 'ThumbnailFile':
-            converter.init(value.name, value.storage, file_obj=file_obj)
+            converter.init(source.name, source.storage, file_obj=file_obj)
         else:
-            converter.init(value, staticfiles_storage)
+            converter.init(source, staticfiles_storage)
 
         supports_webp = context.get('supports_webp', False)
         if not supports_webp or WEBP_DEBUG:
@@ -42,49 +42,76 @@ def webp(context, value):
     return ''
 
 
-def convert(value):
-    webp_value = None
-    if value:
+def convert(source):
+    url = None
+    converted_url = None
+    if source:
         converter = WEBPImageConverter()
-        class_name = value.__class__.__name__
+        class_name = source.__class__.__name__
 
         try:
-            file_obj = value.file
+            file_obj = source.file
         except:
             file_obj = None
 
-        if class_name == 'Image' and hasattr(value, 'file'):
-            converter.init(value.file.name, value.file.storage, file_obj=file_obj)
+        if class_name == 'Image' and hasattr(source, 'file'):
+            converter.init(source.file.name, source.file.storage, file_obj=file_obj)
         elif class_name == 'MultiStorageFieldFile':
-            converter.init(value.name, value.storage, file_obj=file_obj)
+            converter.init(source.name, source.storage, file_obj=file_obj)
         elif class_name == 'ThumbnailFile':
-            converter.init(value.name, value.storage, file_obj=file_obj)
+            converter.init(source.name, source.storage, file_obj=file_obj)
         else:
-            converter.init(value, staticfiles_storage)
+            converter.init(source, staticfiles_storage)
 
-        value = converter.get_url() or value.url
-        webp_value = converter.get_webp_url()
-    return value, webp_value
+        url = converter.get_url() or source.url
+        converted_url = converter.get_webp_url()
+    return url, converted_url
+
+
+@register.filter
+def webp_url(source, alias=None):
+    """
+    Return the webp url for a source file or for thumbnail
+    using an aliased set of thumbnail options.
+
+    If no matching alias is found, returns an empty string.
+
+    Example usage::
+        <img src="{{ person.photo|webp_url }}" alt="">
+        or
+        <img src="{{ person.photo|webp_url:'small' }}" alt="">
+    """
+    if alias:
+        try:
+            from easy_thumbnails.files import get_thumbnailer
+            from easy_thumbnails.conf import settings
+            source = get_thumbnailer(source)[alias]
+        except ImportError:
+            pass
+        except Exception as e:
+            if settings.THUMBNAIL_DEBUG:
+                raise e
+    url, converted_url = convert(source)
+    return converted_url if converted_url and converted_url != url else ''
 
 
 @register.simple_tag
-def webp_picture(value, **kwargs):
+def webp_picture(source, **kwargs):
     kwargs_text = ' '.join([''] + [f'{key}="{value}"' for key, value in kwargs.items()])
 
-    value, webp_value = convert(value)
-
-    if webp_value:
-        return mark_safe(f'<picture><source srcset="{webp_value}" type="image/webp"/><img src="{value}"{kwargs_text}/></picture>')
+    url, converted_url = convert(source)
+    if converted_url and converted_url != url:
+        return mark_safe(f'<picture><source srcset="{converted_url}" type="image/webp"/><img src="{url}"{kwargs_text}/></picture>')
     else:
-        return mark_safe(f'<img src="{value}"{kwargs_text}/>')
+        return mark_safe(f'<img src="{url}"{kwargs_text}/>')
 
 
 @register.simple_tag
-def webp_imageset(value):
-    value, webp_value = convert(value)
-    mimetype = mimetypes.guess_type(value)[0]
+def webp_imageset(source):
+    url, converted_url = convert(source)
+    mimetype = mimetypes.guess_type(source)[0]
 
-    if webp_value:
-        return mark_safe(f'image-set(url("{webp_value}") type("image/webp"), url("{value}") type("{mimetype}"))')
+    if converted_url and converted_url != url:
+        return mark_safe(f'image-set(url("{converted_url}") type("image/webp"), url("{url}") type("{mimetype}"))')
     else:
-        return mark_safe(f'url("{value}")')
+        return mark_safe(f'url("{url}")')
