@@ -109,7 +109,7 @@ def webp_picture(source, **kwargs):
 @register.simple_tag
 def webp_imageset(source):
     url, converted_url = convert(source)
-    mimetype = mimetypes.guess_type(source)[0]
+    mimetype = mimetypes.guess_type(url)[0]
 
     if converted_url and converted_url != url:
         return mark_safe(f'image-set(url("{converted_url}") type("image/webp"), url("{url}") type("{mimetype}"))')
