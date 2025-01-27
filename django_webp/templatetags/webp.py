@@ -115,3 +115,20 @@ def webp_imageset(source):
         return mark_safe(f'image-set(url("{converted_url}") type("image/webp"), url("{url}") type("{mimetype}"))')
     else:
         return mark_safe(f'url("{url}")')
+
+
+@register.simple_tag
+def webp_imageset_resolution(**kwargs):
+    urls = []
+    for resolution, source in kwargs.items():
+        resolution = resolution[::-1]
+        url, converted_url = convert(source)
+        mimetype = mimetypes.guess_type(url)[0]
+
+        if converted_url and converted_url != url:
+            urls.append(f'url("{converted_url}") {resolution} type("image/webp")')
+            urls.append(f'url("{url}") {resolution} type("{mimetype}")')
+        else:
+            urls.append(f'url("{url}") {resolution}')
+
+    return mark_safe('image-set(' + ', '.join(urls) + ')')
