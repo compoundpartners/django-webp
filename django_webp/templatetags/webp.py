@@ -97,6 +97,16 @@ def webp_url(source, alias=None):
 
 @register.simple_tag
 def webp_picture(source, **kwargs):
+    """
+    Return a html picture tag if webp image created, else
+    img tag.
+
+    Example usage::
+
+        {% webp_picture person.photo alt="Person name" class="img" %}
+
+    """
+
     kwargs_text = ' '.join([''] + [f'{key}="{value}"' for key, value in kwargs.items()])
 
     url, converted_url = convert(source)
@@ -108,6 +118,16 @@ def webp_picture(source, **kwargs):
 
 @register.simple_tag
 def webp_imageset(source):
+    """
+    Return a css image-set structure if webp image created,
+    else css url for source image.
+
+    Example usage::
+    
+        {% webp_imageset person.photo %}
+
+    """
+
     url, converted_url = convert(source)
     mimetype = mimetypes.guess_type(url)[0]
 
